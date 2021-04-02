@@ -521,6 +521,8 @@ public class IjkVideoView extends FrameLayout implements AndroidMediaController.
         public void onPrepared(IMediaPlayer mp) {
             mCurrentState = STATE_PREPARED;
 
+            Log.e("dyx","mPreparedListener");
+
             if (mOnPreparedListener != null) {
                 mOnPreparedListener.onPrepared(mMediaPlayer);
             }

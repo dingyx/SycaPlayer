@@ -12,13 +12,17 @@ import android.view.WindowManager;
 
 import com.sycamore.sycaplayer.media.IjkVideoView;
 import com.sycamore.sycaplayer.media.view.AndroidMediaController;
+import com.sycamore.sycaplayer.media.view.VideoLoadingView;
 
+import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 public class PlayerActivity extends AppCompatActivity {
 
     private IjkVideoView videoView;
     private String url;
+
+    private VideoLoadingView loadingView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +50,8 @@ public class PlayerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         videoView = findViewById(R.id.video_view);
+        loadingView = findViewById(R.id.loading_view);
+
         AndroidMediaController mMediaController = new AndroidMediaController(this, false);
         videoView.setMediaController(mMediaController);
         videoView.setVideoPath(url);
@@ -62,6 +68,7 @@ public class PlayerActivity extends AppCompatActivity {
             setRequestedOrientation(currentOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT : ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         });
 
+        videoView.setOnPreparedListener(iMediaPlayer -> loadingView.setVisibility(View.GONE));
 
     }
 
