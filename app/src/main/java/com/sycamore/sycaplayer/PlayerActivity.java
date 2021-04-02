@@ -1,6 +1,5 @@
 package com.sycamore.sycaplayer;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.pm.ActivityInfo;
@@ -14,34 +13,42 @@ import android.view.WindowManager;
 import com.sycamore.sycaplayer.media.IjkVideoView;
 import com.sycamore.sycaplayer.media.view.AndroidMediaController;
 
-public class MainActivity extends AppCompatActivity {
+import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
+public class PlayerActivity extends AppCompatActivity {
+
+    private IjkVideoView videoView;
+    private String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= 21) {//21表示5.0
+
+        if (Build.VERSION.SDK_INT >= 21) {
             Window window = getWindow();
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.TRANSPARENT);
-        } else if (Build.VERSION.SDK_INT >= 19) {//19表示4.4
+        } else if (Build.VERSION.SDK_INT >= 19) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             //虚拟键盘也透明
             //getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         }
 
+        url = getIntent().getStringExtra("url");
+        if (url == null || url.isEmpty()) {
+            url = "rtmp://58.200.131.2:1935/livetv/cctv1";
+        }
+
         setContentView(R.layout.activity_main);
 
-        IjkVideoView videoView = findViewById(R.id.video_view);
-        videoView.setVideoPath("https://vd2.bdstatic.com/mda-md0aegx0t1iueq4q/fhd/cae_h264_nowatermark/1617312402/mda-md0aegx0t1iueq4q.mp4?v_from_s=tc_haokan_4469&auth_key=1617332103-0-0-00e61267d2e1d1270b69767825e3ebe0&bcevod_channel=searchbox_feed&pd=1&pt=3&abtest=3000165_2");
+        videoView = findViewById(R.id.video_view);
         AndroidMediaController mMediaController = new AndroidMediaController(this, false);
         videoView.setMediaController(mMediaController);
-
-        //      videoView.setVideoPath("rtmp://58.200.131.2:1935/livetv/cctv6");
+        videoView.setVideoPath(url);
         videoView.start();
 
         mMediaController.setControllerListener(() -> {
@@ -57,4 +64,29 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
+
+    private boolean mBackPressed;
+
+    @Override
+    public void onBackPressed() {
+        mBackPressed = true;
+
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (mBackPressed || !videoView.isBackgroundPlayEnabled()) {
+            videoView.stopPlayback();
+            videoView.release(true);
+            videoView.stopBackgroundPlay();
+        } else {
+            videoView.enterBackground();
+        }
+        IjkMediaPlayer.native_profileEnd();
+    }
+
 }
